@@ -1,0 +1,78 @@
+version: '3.3'
+services:
+  webserver:
+    build:
+     context: ./bin/webserver
+    container_name: "lamp-webserver"
+    restart: "always"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./www:/var/www
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./config/vhosts:/etc/apache2/sites-enabled
+      - ./logs/apache2:/var/log/apache2
+    links:
+      - mysql:mysql
+  mysql:
+    build: ./bin/mysql
+    container_name: "lamp-mysql"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./logs/mysql:/var/log/mysql
+    ports:
+      - "3306:3306"
+    restart: "always"
+    environment:
+      MYSQL_ROOT_PASSWORD: demo
+      MYSQL_USER: demo
+      MYSQL_PASSWORD: demo
+  phpmyadmin:
+    build: ./bin/phpmyadmin
+    container_name: "lamp-phpmyadmin"
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - '8080:80'
+    volumes:
+      - /sessions
+  redis:
+    build: ./bin/redis
+    container_name: "lamp-redis"
+    ports:
+      - "6379:6379"
+  ftp:
+    build: ./bin/ftp
+    container_name: "lamp-ftp"
+#    volumes:
+#      - ./home/user/:/home/user
+    environment:
+      - "FTP_USER_NAME=www-testweb"
+      - "FTP_USER_PASS=demotw"
+      - "FTP_USER_HOME=/var/www/testweb"
+      - "PASV_ADDRESS=1.2.3.4"
+      - "PUBLICHOST=1.2.3.4"
+      - "FTP_PASSIVE_PORTS=21100:21110"
+      - "PASV_MAX_PORT=21110"
+    ports:
+      - "20-21:20-21"
+      - "21100-21110:21100-21110"
+    expose:
+      - 20
+      - 21
+      - 21100
+      - 21101
+      - 21102
+      - 21103
+      - 21104
+      - 21105
+      - 21106
+      - 21107
+      - 21108
+      - 21109
+      - 21110
+    restart: "always"
